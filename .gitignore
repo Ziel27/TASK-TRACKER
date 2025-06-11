@@ -1,4 +1,17 @@
+# Node modules
+**/node_modules/
+
+# Logs
+*.log
+
+# dotenv
 .env
-**/.env
-backend/.env
-frontend/.env
+
+# macOS
+.DS_Store
+
+# VSCode settings
+.vscode/
+
+# Optional: if you don’t want to lock versions
+package-lock.json
