@@ -110,4 +110,36 @@ export const logoutUser = async (req, res) => {
     });
     
     res.status(200).json({ message: 'User logged out successfully' });
+};
+
+// verify if user is authenticated
+export const verifyUser = async (req, res) => {
+    const token = req.cookies.token;
+    try {
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized access' });
+        }
+
+        try {
+            const secretKey = process.env.JWT_SECRET;
+            const decoded = jwt.verify(token, secretKey);
+            const user = await User.findById(decoded.id).select('-password -__v');
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+            return res.status(200).json({
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                message: 'User is authenticated',
+            });
+            
+        } catch (error) {
+            console.error(error);
+            return res.status(403).json({ message: 'Forbidden access' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(403).json({ message: 'Forbidden access' });
+    }
 }
