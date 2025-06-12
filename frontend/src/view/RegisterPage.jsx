@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const RegisterPage = () => {
@@ -10,41 +11,37 @@ const RegisterPage = () => {
     password: "",
     confirmPassword: "",
   });
-  const [loading, setIsLoading] = useState(false);
-
+  const { register, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate("/");
+    }
+  }, [loading, isAuthenticated, navigate]);
+
   const handleChange = (e) => {
-    e.preventDefault();
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     try {
-      const res = await api.post('/auth/register', form);
-      console.log("Data successfully sent:", res.data);
-      setForm({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-      });
-      setIsLoading(false);
-      toast.success("Registration successful!");
-      navigate("/login");
-    } catch (error) {
-      toast.error(error.response?.data?.message);
-      setIsLoading(false);
-      if (error.response && error.response.data) {
-        console.error("Server response:", error.response.data);
+      const res = await register(form);
+      if (res.status === 201) {
+        toast.success("Registration successful!");
+        setTimeout(() => {
+          navigate("/");
+        }, 2000);
       }
+    } catch (error) {
+      console.error("Registration failed:", error);
+      toast.error(error?.message || "Registration failed");
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <span className="loading loading-dots loading-xl"></span>;
   }
 
   return (
@@ -52,7 +49,7 @@ const RegisterPage = () => {
       <div className="flex flex-col gap-4 bg-base-100 w-full max-w-md border-2 border-base-300 rounded-lg shadow-lg p-6">
         <div className="text-center mb-4">
           <h1 className="text-2xl font-bold mb-2">Register</h1>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm mb-4">
             Please fill the form below to create an account
           </p>
         </div>
@@ -120,12 +117,15 @@ const RegisterPage = () => {
           </div>
         </form>
         <div>
-            <p className="text-sm text-gray-500 mt-4">
-                Already have an account?{" "}
-                <a href="/login" className="text-primary font-semibold link link-primary">
-                Login here
-                </a>
-            </p>
+          <p className="text-sm mt-4">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="text-primary font-semibold link link-primary"
+            >
+              Login
+            </Link>
+          </p>
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
-import React from 'react'
+import React from "react";
+import Card from "../components/Card";
 
 const TaskPage = () => {
-  return (
-    <div>TaskPage</div>
-  )
-}
+  return ( <div> </div>
+  );
+};
 
-export default TaskPage
+export default TaskPage;
